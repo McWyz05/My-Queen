@@ -2,8 +2,8 @@
 
 :root {
   --bg:          #09090f;
-  --bg-card:     rgba(255,255,255,0.05);
-  --bg-card-h:   rgba(255,255,255,0.09);
+  --bg-card:     rgba(9,9,15,0.82);
+  --bg-card-h:   rgba(9,9,15,0.92);
   --pink:        #ff6b9d;
   --coral:       #ff8e53;
   --gold:        #ffd700;
@@ -47,6 +47,7 @@ body {
   padding: 5rem 1.5rem 3rem;
   text-align: center;
   position: relative;
+  z-index: 3;
 }
 .container { max-width: 680px; width: 100%; margin: 0 auto; }
 
@@ -158,7 +159,7 @@ h3 { font-size: 1.2rem; }
   background: var(--grad);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-  opacity: 0.5; margin-top: 0;
+  opacity: 1; margin-top: 0;
 }
 .c-label {
   font-size: 0.6rem; text-transform: uppercase;
@@ -413,7 +414,7 @@ h3 { font-size: 1.2rem; }
   box-shadow: 0 6px 28px rgba(0,0,0,0.6);
   overflow: hidden;
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
   will-change: transform;
   transform-origin: center center;
 }

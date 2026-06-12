@@ -117,7 +117,7 @@
       </div>
 
       <div style="margin-top:3rem; display:flex; flex-direction:column; align-items:center; gap:1rem;">
-        <p class="lead" style="font-size:0.95rem;">Tu veux réclamer un bon ? 👀</p>
+        <p class="lead" style="font-size:0.95rem;">Tu veux me demander un truc Mon Cœur ? 👀</p>
         <a href="coupons.html" class="btn btn-primary">Mes bons pour... 🎟️</a>
       </div>
     </div>
@@ -183,7 +183,7 @@
       document.getElementById('gift-icon').textContent  = surprise.icon;
       document.getElementById('gift-title').textContent = surprise.title;
       document.getElementById('gift-msg').textContent   = surprise.content;
-      document.getElementById('gift-day-txt').textContent = `Surprise n°${idx + 1} / ${CONFIG.dailySurprises.length}`;
+      document.getElementById('gift-day-txt').textContent = 'Le Meilleur pour la Meilleure ❤️';
     })();
 
     let giftOpened = false;
@@ -233,15 +233,9 @@
       const opts = document.querySelectorAll('.quiz-opt');
       opts.forEach(o => o.disabled = true);
 
-      if (chosen === q.correctIndex) {
-        score++;
-        btn.classList.add('correct');
-        showToast('Bonne réponse ! 🎉');
-      } else {
-        btn.classList.add('wrong');
-        opts[q.correctIndex].classList.add('correct');
-        showToast('Presque... 😊');
-      }
+      score++;
+      btn.classList.add('correct');
+      showToast('Bonne réponse ! 🎉');
 
       const expl = document.getElementById('quiz-expl');
       expl.textContent = q.explanation;
