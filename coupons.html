@@ -16,12 +16,15 @@
   <canvas id="particles-canvas"></canvas>
   <div class="toast" id="toast"></div>
 
-  <nav class="nav">
+  <nav class="nav" id="main-nav">
     <span class="nav-logo">Pour My Queen 👑</span>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="nav-links">
-      <a href="index.html"    class="nav-link">Accueil</a>
-      <a href="surprise.html" class="nav-link">Surprise</a>
-      <a href="coupons.html"  class="nav-link active">Mes bons</a>
+      <a href="index.html"    class="nav-link"        onclick="closeMenu()">Accueil</a>
+      <a href="surprise.html" class="nav-link"        onclick="closeMenu()">Surprise</a>
+      <a href="coupons.html"  class="nav-link active" onclick="closeMenu()">Mes bons</a>
     </div>
   </nav>
 
@@ -315,6 +318,10 @@
     /* Init */
     renderTickets();
     startPhotosBg();
+
+    /* ── Hamburger menu ── */
+    function toggleMenu() { document.getElementById('main-nav').classList.toggle('open'); }
+    function closeMenu()  { document.getElementById('main-nav').classList.remove('open'); }
   </script>
 </body>
 </html>
