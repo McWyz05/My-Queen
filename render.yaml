@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: pour-my-queen
+    env: static
+    staticPublishPath: .
+    buildCommand: ""
+    pullRequestPreviewsEnabled: false

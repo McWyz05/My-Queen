@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ta Surprise 🎁 — My Queen</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="page fade-up">
+
+  <canvas id="particles-canvas"></canvas>
+  <div class="toast" id="toast"></div>
+
+  <nav class="nav">
+    <span class="nav-logo">Pour My Queen 👑</span>
+    <div class="nav-links">
+      <a href="index.html"   class="nav-link">Accueil</a>
+      <a href="surprise.html" class="nav-link active">Surprise</a>
+      <a href="coupons.html"  class="nav-link">Mes bons</a>
+    </div>
+  </nav>
+
+  <!-- SECTION 1 : Boîte cadeau -->
+  <section class="section" id="sec-gift">
+    <div class="container">
+      <p class="muted" style="margin-bottom:0.3rem;" id="day-label"></p>
+      <h2 class="section-title">Ta Surprise du Jour ✨</h2>
+      <p class="section-sub">Clique sur la boîte pour l'ouvrir 🎁</p>
+
+      <div class="gift-wrap-outer">
+        <!-- Boîte cadeau (SVG animé) -->
+        <div class="gift-click-zone" id="giftZone" onclick="openGift()">
+          <svg class="gift-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="boxGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"  stop-color="#ff6b9d"/>
+                <stop offset="100%" stop-color="#ff8e53"/>
+              </linearGradient>
+              <linearGradient id="lidGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"  stop-color="#c77dff"/>
+                <stop offset="100%" stop-color="#ff6b9d"/>
+              </linearGradient>
+            </defs>
+            <!-- Corps -->
+            <rect x="15" y="55" width="90" height="55" rx="4" fill="url(#boxGrad)" opacity="0.9"/>
+            <!-- Ruban vertical corps -->
+            <rect x="53" y="55" width="14" height="55" rx="2" fill="rgba(255,255,255,0.25)"/>
+            <!-- Couvercle (animé) -->
+            <g class="gift-lid" id="giftLid">
+              <rect x="10" y="40" width="100" height="20" rx="4" fill="url(#lidGrad)"/>
+              <!-- Ruban vertical couvercle -->
+              <rect x="53" y="40" width="14" height="20" rx="2" fill="rgba(255,255,255,0.25)"/>
+              <!-- Nœud gauche -->
+              <ellipse cx="50" cy="40" rx="16" ry="9" fill="#ffd700" opacity="0.9" transform="rotate(-30 50 40)"/>
+              <!-- Nœud droit -->
+              <ellipse cx="70" cy="40" rx="16" ry="9" fill="#ffd700" opacity="0.9" transform="rotate(30 70 40)"/>
+              <!-- Centre nœud -->
+              <circle cx="60" cy="40" r="7" fill="#ff6b9d"/>
+            </g>
+            <!-- Points déco -->
+            <circle cx="30" cy="80" r="3" fill="rgba(255,255,255,0.3)"/>
+            <circle cx="90" cy="90" r="2.5" fill="rgba(255,255,255,0.25)"/>
+            <circle cx="75" cy="72" r="2" fill="rgba(255,255,255,0.2)"/>
+          </svg>
+          <p class="gift-hint" id="gift-hint">Clique pour ouvrir ✨</p>
+        </div>
+
+        <!-- Contenu révélé -->
+        <div class="card gift-content fade-up" id="giftContent" style="display:none; max-width:460px; text-align:center;">
+          <span class="gift-icon" id="gift-icon"></span>
+          <h3 class="gift-title" id="gift-title"></h3>
+          <p class="gift-msg" id="gift-msg"></p>
+          <p class="gift-day muted" id="gift-day-txt"></p>
+        </div>
+      </div>
+
+      <div class="scroll-hint" style="bottom:1.5rem;">
+        <span>quiz en dessous</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2 : Quiz -->
+  <section class="section" id="sec-quiz" style="background: radial-gradient(ellipse at center, rgba(199,125,255,0.06) 0%, transparent 70%);">
+    <div class="container">
+      <h2 class="section-title">Le Quiz 💕</h2>
+      <p class="section-sub">Devine ce que j'aime le plus chez toi</p>
+
+      <div class="card quiz-wrap" id="quiz-wrap">
+        <!-- Barre de progression -->
+        <div class="quiz-bar-track"><div class="quiz-bar" id="quiz-bar" style="width:0%"></div></div>
+
+        <!-- Question en cours -->
+        <div id="quiz-question-area">
+          <p class="quiz-q" id="quiz-q-text"></p>
+          <div class="quiz-opts" id="quiz-opts"></div>
+          <p class="quiz-expl" id="quiz-expl" style="display:none;"></p>
+          <div class="quiz-foot">
+            <span class="quiz-count" id="quiz-count"></span>
+            <button class="btn btn-primary btn-sm" id="quiz-next" onclick="nextQuestion()" style="display:none;">
+              Suivant →
+            </button>
+          </div>
+        </div>
+
+        <!-- Résultat final -->
+        <div id="quiz-result" style="display:none;" class="quiz-result">
+          <div class="quiz-score-big" id="quiz-score-big"></div>
+          <p style="font-family:'Playfair Display',serif; font-size:1.3rem; margin:0.75rem 0;" id="quiz-result-msg"></p>
+          <p class="lead" id="quiz-result-sub" style="margin-bottom:1.5rem;"></p>
+          <button class="btn btn-ghost" onclick="restartQuiz()">Rejouer 🔄</button>
+        </div>
+      </div>
+
+      <div style="margin-top:3rem; display:flex; flex-direction:column; align-items:center; gap:1rem;">
+        <p class="lead" style="font-size:0.95rem;">Tu veux réclamer un bon ? 👀</p>
+        <a href="coupons.html" class="btn btn-primary">Mes bons pour... 🎟️</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="config.js"></script>
+  <script>
+    /* ── Particles (identique à index.html) ── */
+    (function () {
+      const cvs = document.getElementById('particles-canvas');
+      const ctx = cvs.getContext('2d');
+      const CHARS = ['♥','❤','✦','✧','·'];
+      const COLOR = ['#ff6b9d','#ff8e53','#c77dff','#ffd700'];
+      let W, H;
+      const particles = [];
+      function resize() { W = cvs.width = innerWidth; H = cvs.height = innerHeight; }
+      resize(); window.addEventListener('resize', resize);
+      for (let i = 0; i < 30; i++) particles.push({
+        x: Math.random(), y: Math.random(),
+        size: Math.random()*12+5, speed: Math.random()*0.35+0.18,
+        op: Math.random()*0.4+0.1,
+        ch: CHARS[Math.floor(Math.random()*CHARS.length)],
+        col: COLOR[Math.floor(Math.random()*COLOR.length)],
+        rot: Math.random()*360, rs: (Math.random()-.5)*1.4,
+        amp: Math.random()*0.8+0.3, phase: Math.random()*Math.PI*2,
+      });
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        particles.forEach(p => {
+          const px = (p.x + p.amp*0.011*Math.sin(p.y*8+p.phase))*W;
+          const py = p.y*H;
+          ctx.save(); ctx.translate(px,py); ctx.rotate(p.rot*Math.PI/180);
+          ctx.globalAlpha=p.op; ctx.fillStyle=p.col;
+          ctx.font=`${p.size}px serif`; ctx.fillText(p.ch,0,0); ctx.restore();
+          p.y -= p.speed/H; p.rot += p.rs;
+          if (p.y < -0.05) { p.y=1.05; p.x=Math.random(); }
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ── Toast ── */
+    let toastTimer;
+    function showToast(msg, dur=2200) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+    }
+
+    /* ── Surprise du jour ── */
+    (function() {
+      const today = new Date();
+      const dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+      const idx = (dayOfYear - 1 + CONFIG.dailySurprises.length) % CONFIG.dailySurprises.length;
+      const surprise = CONFIG.dailySurprises[idx];
+
+      document.getElementById('day-label').textContent =
+        today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+      document.getElementById('gift-icon').textContent  = surprise.icon;
+      document.getElementById('gift-title').textContent = surprise.title;
+      document.getElementById('gift-msg').textContent   = surprise.content;
+      document.getElementById('gift-day-txt').textContent = `Surprise n°${idx + 1} / ${CONFIG.dailySurprises.length}`;
+    })();
+
+    let giftOpened = false;
+    function openGift() {
+      if (giftOpened) return;
+      giftOpened = true;
+      const zone    = document.getElementById('giftZone');
+      const hint    = document.getElementById('gift-hint');
+      const content = document.getElementById('giftContent');
+      zone.classList.add('opening');
+      hint.textContent = '🎉';
+      setTimeout(() => {
+        content.style.display = 'block';
+        showToast('Bonne journée My Queen 💕', 3000);
+      }, 650);
+    }
+
+    /* ── Quiz ── */
+    const questions = CONFIG.quizQuestions;
+    let qIdx = 0, score = 0, answered = false;
+
+    function renderQuestion() {
+      const q  = questions[qIdx];
+      const pct = (qIdx / questions.length) * 100;
+      document.getElementById('quiz-bar').style.width = pct + '%';
+      document.getElementById('quiz-q-text').textContent = q.question;
+      document.getElementById('quiz-count').textContent  = `${qIdx + 1} / ${questions.length}`;
+      document.getElementById('quiz-expl').style.display = 'none';
+      document.getElementById('quiz-next').style.display = 'none';
+      answered = false;
+
+      const optsEl = document.getElementById('quiz-opts');
+      optsEl.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-opt';
+        btn.textContent = opt;
+        btn.onclick = () => answerQuestion(i, btn);
+        optsEl.appendChild(btn);
+      });
+    }
+
+    function answerQuestion(chosen, btn) {
+      if (answered) return;
+      answered = true;
+      const q = questions[qIdx];
+      const opts = document.querySelectorAll('.quiz-opt');
+      opts.forEach(o => o.disabled = true);
+
+      if (chosen === q.correctIndex) {
+        score++;
+        btn.classList.add('correct');
+        showToast('Bonne réponse ! 🎉');
+      } else {
+        btn.classList.add('wrong');
+        opts[q.correctIndex].classList.add('correct');
+        showToast('Presque... 😊');
+      }
+
+      const expl = document.getElementById('quiz-expl');
+      expl.textContent = q.explanation;
+      expl.style.display = 'block';
+      document.getElementById('quiz-next').style.display = 'inline-flex';
+    }
+
+    function nextQuestion() {
+      qIdx++;
+      if (qIdx >= questions.length) {
+        showResult();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    const resultMsgs = [
+      [0, 2, '💔 Aïe...', 'Tu me connais encore mal, mais c\'est pour ça qu\'on est là ! 😄'],
+      [2, 4, '💛 Pas mal !', 'Tu commences à cerner les contours de ce que j\'aime chez toi 😊'],
+      [4, 5, '💕 Presque !', 'Tu as failli avoir un sans-faute... La prochaine fois ! 😍'],
+      [5, 5, '❤️ Parfait !', 'Tu me connais par cœur. Je t\'aime, My Queen 👑'],
+    ];
+
+    function showResult() {
+      document.getElementById('quiz-bar').style.width = '100%';
+      document.getElementById('quiz-question-area').style.display = 'none';
+      const res = document.getElementById('quiz-result');
+      res.style.display = 'block';
+      document.getElementById('quiz-score-big').textContent = `${score} / ${questions.length}`;
+
+      let msg = resultMsgs[0];
+      for (const m of resultMsgs) {
+        if (score >= m[0] && score <= m[1]) msg = m;
+      }
+      // Special case for perfect score
+      if (score === questions.length) msg = resultMsgs[3];
+
+      document.getElementById('quiz-result-msg').textContent = msg[2];
+      document.getElementById('quiz-result-sub').textContent = msg[3];
+    }
+
+    function restartQuiz() {
+      qIdx = 0; score = 0;
+      document.getElementById('quiz-result').style.display = 'none';
+      document.getElementById('quiz-question-area').style.display = 'block';
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>

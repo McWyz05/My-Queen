@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pour My Queen 👑</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="page fade-up">
+
+  <canvas id="particles-canvas"></canvas>
+  <canvas id="confetti-canvas" style="display:none"></canvas>
+  <div class="toast" id="toast"></div>
+
+  <!-- SECTION 1 : Compteur -->
+  <section class="section" id="sec-counter" style="min-height:100vh;">
+    <div class="container">
+      <p class="lead" style="font-size:1.15rem; margin-bottom:0.5rem;">ça fait</p>
+      <div class="counter-wrap" id="counter">
+        <div class="c-unit"><span class="c-val" id="c-y">0</span><span class="c-label">ans</span></div>
+        <span class="c-sep">:</span>
+        <div class="c-unit"><span class="c-val" id="c-mo">00</span><span class="c-label">mois</span></div>
+        <span class="c-sep">:</span>
+        <div class="c-unit"><span class="c-val" id="c-d">00</span><span class="c-label">jours</span></div>
+        <span class="c-sep">:</span>
+        <div class="c-unit"><span class="c-val" id="c-h">00</span><span class="c-label">heures</span></div>
+        <span class="c-sep">:</span>
+        <div class="c-unit"><span class="c-val" id="c-m">00</span><span class="c-label">min</span></div>
+        <span class="c-sep">:</span>
+        <div class="c-unit"><span class="c-val" id="c-s">00</span><span class="c-label">sec</span></div>
+      </div>
+      <p style="font-size:clamp(1.2rem,3vw,1.8rem); margin-top:0.5rem;">
+        que je <span class="gradient-text" style="font-family:'Playfair Display',serif; font-style:italic;">t'aime</span> ❤️
+      </p>
+    </div>
+
+    <div class="scroll-hint">
+      <span>défiler</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 2 : Est-ce que tu m'aimes ? -->
+  <section class="section" id="sec-love" style="background: radial-gradient(ellipse at center, rgba(255,107,157,0.06) 0%, transparent 70%);">
+    <div class="container">
+      <p class="lead" style="margin-bottom:0.6rem; font-size:0.95rem;">Une question importante…</p>
+      <h2 style="font-style:italic; margin-bottom:0.3rem;">
+        Est-ce que tu m'<span class="gradient-text">aimes</span> ?
+      </h2>
+      <p class="muted" style="margin-bottom:0;">(Réfléchis bien 😏)</p>
+
+      <div class="love-buttons" id="love-buttons">
+        <button id="btn-oui" onclick="clickOui()">Oui 💕</button>
+        <button id="btn-non" onclick="clickNon()">Non</button>
+      </div>
+
+      <div id="continue-area" style="display:none;" class="bounce-in">
+        <p class="lead" style="margin-bottom:1.5rem; font-size:1.1rem;">Je le savais depuis le début 😍✨</p>
+        <a href="surprise.html" class="btn btn-primary" style="font-size:1.05rem; padding:1rem 2.5rem;">
+          On continue My Queen ! 👑
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script src="config.js"></script>
+  <script>
+    /* ── Particles ── */
+    (function () {
+      const cvs = document.getElementById('particles-canvas');
+      const ctx = cvs.getContext('2d');
+      const CHARS = ['♥','❤','✦','✧','·'];
+      const COLOR = ['#ff6b9d','#ff8e53','#c77dff','#ffd700'];
+      let W, H, particles = [];
+
+      function resize() {
+        W = cvs.width  = window.innerWidth;
+        H = cvs.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      for (let i = 0; i < 35; i++) {
+        particles.push({
+          x: Math.random() * 1,
+          y: Math.random(),
+          size: Math.random() * 13 + 5,
+          speed: Math.random() * 0.4 + 0.2,
+          op: Math.random() * 0.45 + 0.1,
+          ch: CHARS[Math.floor(Math.random() * CHARS.length)],
+          col: COLOR[Math.floor(Math.random() * COLOR.length)],
+          rot: Math.random() * 360,
+          rs: (Math.random() - 0.5) * 1.5,
+          amp: Math.random() * 0.8 + 0.3,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => {
+          const px = (p.x + p.amp * 0.012 * Math.sin(p.y * 8 + p.phase)) * W;
+          const py = p.y * H;
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.globalAlpha = p.op;
+          ctx.fillStyle = p.col;
+          ctx.font = `${p.size}px serif`;
+          ctx.fillText(p.ch, 0, 0);
+          ctx.restore();
+          p.y -= p.speed / H;
+          p.rot += p.rs;
+          if (p.y < -0.05) { p.y = 1.05; p.x = Math.random(); }
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ── Counter ── */
+    function getTimeDiff(start) {
+      const now = new Date();
+      let yr = now.getFullYear() - start.getFullYear();
+      let mo = now.getMonth()    - start.getMonth();
+      let d  = now.getDate()     - start.getDate();
+      let h  = now.getHours()    - start.getHours();
+      let mi = now.getMinutes()  - start.getMinutes();
+      let s  = now.getSeconds()  - start.getSeconds();
+      if (s  < 0) { s  += 60; mi--; }
+      if (mi < 0) { mi += 60; h--; }
+      if (h  < 0) { h  += 24; d--; }
+      if (d  < 0) { mo--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+      if (mo < 0) { mo += 12; yr--; }
+      return { yr, mo, d, h, mi, s };
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tick() {
+      const t = getTimeDiff(CONFIG.startDate);
+      document.getElementById('c-y').textContent  = t.yr;
+      document.getElementById('c-mo').textContent = pad(t.mo);
+      document.getElementById('c-d').textContent  = pad(t.d);
+      document.getElementById('c-h').textContent  = pad(t.h);
+      document.getElementById('c-m').textContent  = pad(t.mi);
+      document.getElementById('c-s').textContent  = pad(t.s);
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    /* ── Toast ── */
+    let toastTimer;
+    function showToast(msg, dur = 2200) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+    }
+
+    /* ── Oui / Non logic ── */
+    let noClicks = 0;
+    const MAX = 5;
+    const noMsgs = ['😏 Vraiment ?', '🤔 T\'es sûre sûre ?', '👀 Ah bon...', '😄 Allez !', '💕 Je savais que tu m\'aimais !'];
+    let noPos  = null;
+    const isMobile = window.matchMedia('(hover:none)').matches;
+
+    /* Desktop : bouton Non qui fuit */
+    if (!isMobile) {
+      document.addEventListener('mousemove', function flee(e) {
+        const btn = document.getElementById('btn-non');
+        if (!btn || btn.style.display === 'none') return;
+        if (!noPos) {
+          const r = btn.getBoundingClientRect();
+          // N'initialise que si le bouton est visible dans le viewport
+          if (r.top < 0 || r.bottom > window.innerHeight || r.width === 0) return;
+          noPos = { x: r.left, y: r.top, w: r.width, h: r.height };
+          btn.style.position = 'fixed';
+          btn.style.margin   = '0';
+          btn.style.left     = noPos.x + 'px';
+          btn.style.top      = noPos.y + 'px';
+        }
+        const cx = noPos.x + noPos.w / 2;
+        const cy = noPos.y + noPos.h / 2;
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 140) {
+          const a = Math.atan2(dy, dx);
+          const d = 130 + (140 - dist);
+          noPos.x = Math.max(0, Math.min(window.innerWidth  - noPos.w, noPos.x - Math.cos(a) * d));
+          noPos.y = Math.max(0, Math.min(window.innerHeight - noPos.h, noPos.y - Math.sin(a) * d));
+          btn.style.left = noPos.x + 'px';
+          btn.style.top  = noPos.y + 'px';
+        }
+      });
+    }
+
+    function clickNon() {
+      noClicks++;
+      const oui = document.getElementById('btn-oui');
+      const non = document.getElementById('btn-non');
+      const scale = 1 + noClicks * 0.28;
+      oui.style.transform = `scale(${scale})`;
+      non.style.opacity   = Math.max(0, 1 - noClicks * 0.22);
+      non.style.transform = `scale(${Math.max(0.1, 1 - noClicks * 0.18)})`;
+      showToast(noMsgs[Math.min(noClicks - 1, noMsgs.length - 1)]);
+      if (noClicks >= MAX) {
+        non.style.display = 'none';
+        showToast('💕 Je savais que tu m\'aimais !', 3000);
+      }
+    }
+
+    /* Confetti */
+    function launchConfetti() {
+      const cvs = document.getElementById('confetti-canvas');
+      cvs.style.display = 'block';
+      cvs.width  = window.innerWidth;
+      cvs.height = window.innerHeight;
+      const ctx  = cvs.getContext('2d');
+      const cols = ['#ff6b9d','#ff8e53','#ffd700','#c77dff','#ffffff','#6ee7b7'];
+      const pcs  = [];
+      for (let i = 0; i < 120; i++) {
+        pcs.push({
+          x:  Math.random() * cvs.width,
+          y: -20 - Math.random() * 100,
+          w:  Math.random() * 11 + 4,
+          h:  Math.random() * 6  + 3,
+          c:  cols[Math.floor(Math.random() * cols.length)],
+          sp: Math.random() * 3.5 + 2,
+          dr: (Math.random() - 0.5) * 1.8,
+          a:  Math.random() * 360,
+          rs: (Math.random() - 0.5) * 6,
+        });
+      }
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        let alive = false;
+        pcs.forEach(p => {
+          if (p.y < cvs.height + 10) {
+            alive = true;
+            p.y += p.sp; p.x += p.dr; p.a += p.rs;
+            ctx.save();
+            ctx.translate(p.x, p.y); ctx.rotate(p.a * Math.PI / 180);
+            ctx.fillStyle = p.c;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+          }
+        });
+        if (alive && frame++ < 220) requestAnimationFrame(draw);
+        else { cvs.style.display = 'none'; ctx.clearRect(0,0,cvs.width,cvs.height); }
+      }
+      draw();
+    }
+
+    function clickOui() {
+      launchConfetti();
+      const oui = document.getElementById('btn-oui');
+      const non = document.getElementById('btn-non');
+      /* Réinitialise les tailles */
+      oui.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s, font-size 0.5s';
+      oui.style.transform  = 'scale(1)';
+      oui.style.fontSize   = '';
+      non.style.display    = 'none';
+      oui.style.display    = 'none';
+      setTimeout(() => {
+        document.getElementById('continue-area').style.display = 'block';
+        document.getElementById('continue-area').classList.add('bounce-in');
+      }, 400);
+    }
+  </script>
+</body>
+</html>

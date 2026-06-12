@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Bons Pour... 🎟️ — My Queen</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body class="page fade-up">
+
+  <canvas id="particles-canvas"></canvas>
+  <div class="toast" id="toast"></div>
+
+  <nav class="nav">
+    <span class="nav-logo">Pour My Queen 👑</span>
+    <div class="nav-links">
+      <a href="index.html"    class="nav-link">Accueil</a>
+      <a href="surprise.html" class="nav-link">Surprise</a>
+      <a href="coupons.html"  class="nav-link active">Mes bons</a>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top:6rem; min-height:auto; padding-bottom:4rem;">
+    <div class="container" style="max-width:640px;">
+
+      <h2 class="section-title">Mes Bons Pour... 🎟️</h2>
+      <p class="section-sub">
+        Choisis un type de bon, décris ta demande,<br>
+        et il reçoit une notification 📩
+      </p>
+
+      <!-- Étape 1 : Choisir le type -->
+      <div id="step-type" class="step-panel">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem; text-transform:uppercase; letter-spacing:.08em;">
+          Étape 1 — Choisis ton bon
+        </p>
+        <div class="coupon-types" id="coupon-types-grid"></div>
+      </div>
+
+      <!-- Étape 2 : Formulaire -->
+      <div id="step-form" class="step-panel" style="display:none;">
+        <button class="btn btn-ghost btn-sm" onclick="goBack()" style="margin-bottom:1.5rem;">
+          ← Changer de type
+        </button>
+
+        <div class="card" style="text-align:left;">
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+            <span id="form-type-icon" style="font-size:2rem;"></span>
+            <div>
+              <p style="font-weight:600;" id="form-type-label"></p>
+              <p class="muted">Bon à réclamer</p>
+            </div>
+          </div>
+
+          <div class="coupon-form" id="coupon-form" style="max-width:100%;">
+            <div class="fg">
+              <label>Titre du bon *</label>
+              <input type="text" id="f-title" placeholder="ex: Soirée sushis ce vendredi" maxlength="80" required>
+            </div>
+            <div class="fg">
+              <label>Détails de ta demande</label>
+              <textarea id="f-desc" placeholder="Plus c'est précis, mieux c'est 😏" maxlength="400"></textarea>
+            </div>
+            <div class="fg">
+              <label>Date souhaitée <span class="muted">(optionnel)</span></label>
+              <input type="date" id="f-date">
+            </div>
+
+            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:0.5rem;" onclick="submitCoupon()">
+              Envoyer le bon 🎟️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Étape 3 : Confirmation -->
+      <div id="step-confirm" style="display:none; text-align:center;" class="fade-up">
+        <div style="font-size:4rem; margin-bottom:1rem;">🎉</div>
+        <h3 style="font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:0.5rem;">
+          Bon envoyé !
+        </h3>
+        <p class="lead" style="margin-bottom:2rem;">
+          Il a reçu une notification. Maintenant tu n'as plus qu'à attendre 😏
+        </p>
+        <button class="btn btn-primary" onclick="newCoupon()">Créer un autre bon ✨</button>
+      </div>
+
+      <!-- Historique des bons -->
+      <div id="history-section" style="margin-top:3rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h3 style="font-family:'Playfair Display',serif;">Mes bons envoyés</h3>
+          <button class="btn btn-ghost btn-sm" onclick="clearHistory()" id="clear-btn" style="display:none;">
+            Tout effacer
+          </button>
+        </div>
+        <div class="tickets-list" id="tickets-list">
+          <p class="muted" id="no-tickets">Aucun bon pour l'instant. Réclame ton premier bon ! 👆</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script src="config.js"></script>
+  <script>
+    /* ── Particles ── */
+    (function () {
+      const cvs = document.getElementById('particles-canvas');
+      const ctx = cvs.getContext('2d');
+      const CHARS = ['♥','❤','✦','✧','·'];
+      const COLOR = ['#ff6b9d','#ff8e53','#c77dff','#ffd700'];
+      let W, H;
+      const particles = [];
+      function resize() { W = cvs.width = innerWidth; H = cvs.height = innerHeight; }
+      resize(); window.addEventListener('resize', resize);
+      for (let i = 0; i < 28; i++) particles.push({
+        x: Math.random(), y: Math.random(),
+        size: Math.random()*12+5, speed: Math.random()*0.35+0.18,
+        op: Math.random()*0.4+0.1,
+        ch: CHARS[Math.floor(Math.random()*CHARS.length)],
+        col: COLOR[Math.floor(Math.random()*COLOR.length)],
+        rot: Math.random()*360, rs: (Math.random()-.5)*1.4,
+        amp: Math.random()*0.8+0.3, phase: Math.random()*Math.PI*2,
+      });
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        particles.forEach(p => {
+          const px=(p.x+p.amp*0.011*Math.sin(p.y*8+p.phase))*W, py=p.y*H;
+          ctx.save(); ctx.translate(px,py); ctx.rotate(p.rot*Math.PI/180);
+          ctx.globalAlpha=p.op; ctx.fillStyle=p.col;
+          ctx.font=`${p.size}px serif`; ctx.fillText(p.ch,0,0); ctx.restore();
+          p.y-=p.speed/H; p.rot+=p.rs;
+          if(p.y<-0.05){p.y=1.05;p.x=Math.random();}
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ── Toast ── */
+    let toastTimer;
+    function showToast(msg, dur=2400) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+    }
+
+    /* ── Init EmailJS ── */
+    emailjs.init(CONFIG.emailJS.publicKey);
+
+    /* ── State ── */
+    let selectedType = null;
+
+    /* ── Render coupon type grid ── */
+    const grid = document.getElementById('coupon-types-grid');
+    CONFIG.couponTypes.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'c-type-btn';
+      btn.innerHTML = `<span class="c-type-icon">${t.icon}</span><span class="c-type-label">${t.label}</span>`;
+      btn.onclick = () => selectType(t, btn);
+      grid.appendChild(btn);
+    });
+
+    function selectType(type, btnEl) {
+      document.querySelectorAll('.c-type-btn').forEach(b => b.classList.remove('sel'));
+      btnEl.classList.add('sel');
+      selectedType = type;
+      document.getElementById('form-type-icon').textContent  = type.icon;
+      document.getElementById('form-type-label').textContent = type.label;
+      // Set default date to today
+      document.getElementById('f-date').valueAsDate = new Date();
+      showStep('form');
+    }
+
+    function goBack() {
+      showStep('type');
+      selectedType = null;
+    }
+
+    function showStep(step) {
+      document.getElementById('step-type').style.display    = step === 'type'    ? 'block' : 'none';
+      document.getElementById('step-form').style.display    = step === 'form'    ? 'block' : 'none';
+      document.getElementById('step-confirm').style.display = step === 'confirm' ? 'block' : 'none';
+    }
+
+    function newCoupon() {
+      document.getElementById('f-title').value = '';
+      document.getElementById('f-desc').value  = '';
+      document.getElementById('f-date').valueAsDate = new Date();
+      document.querySelectorAll('.c-type-btn').forEach(b => b.classList.remove('sel'));
+      selectedType = null;
+      showStep('type');
+    }
+
+    /* ── Submit coupon ── */
+    async function submitCoupon() {
+      const title = document.getElementById('f-title').value.trim();
+      const desc  = document.getElementById('f-desc').value.trim();
+      const date  = document.getElementById('f-date').value;
+
+      if (!title) { showToast('⚠️ Donne un titre à ton bon !'); return; }
+      if (!selectedType) { showToast('⚠️ Choisis un type de bon !'); return; }
+
+      const submitBtn = document.querySelector('#coupon-form .btn-primary');
+      submitBtn.textContent = 'Envoi en cours... ⏳';
+      submitBtn.disabled = true;
+
+      const ticketId = 'MQ-' + Date.now().toString(36).toUpperCase();
+      const dateLabel = date
+        ? new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+        : 'Non précisée';
+      const now = new Date().toLocaleString('fr-FR');
+
+      const templateParams = {
+        to_email:   CONFIG.emailJS.recipientEmail,
+        ticket_id:  ticketId,
+        type_icon:  selectedType.icon,
+        type_label: selectedType.label,
+        title:      title,
+        description: desc || '(Aucun détail fourni)',
+        date_souhaitee: dateLabel,
+        submitted_at: now,
+      };
+
+      try {
+        await emailjs.send(
+          CONFIG.emailJS.serviceId,
+          CONFIG.emailJS.templateId,
+          templateParams,
+        );
+
+        /* Sauvegarder dans localStorage */
+        const ticket = { id: ticketId, type: selectedType, title, desc, date: dateLabel, submittedAt: now };
+        saveTicket(ticket);
+        renderTickets();
+
+        showStep('confirm');
+        showToast('Bon envoyé avec succès ! 🎉', 3000);
+      } catch (err) {
+        console.error('EmailJS error:', err);
+        showToast('❌ Erreur d\'envoi. Vérifie la config EmailJS.');
+        submitBtn.textContent = 'Envoyer le bon 🎟️';
+        submitBtn.disabled = false;
+      }
+    }
+
+    /* ── LocalStorage ── */
+    const STORAGE_KEY = 'mq_tickets';
+
+    function getTickets() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveTicket(ticket) {
+      const tickets = getTickets();
+      tickets.unshift(ticket);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+    }
+
+    function clearHistory() {
+      if (!confirm('Effacer tout l\'historique des bons ?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      renderTickets();
+    }
+
+    function renderTickets() {
+      const tickets = getTickets();
+      const list    = document.getElementById('tickets-list');
+      const noTxt   = document.getElementById('no-tickets');
+      const clearBtn = document.getElementById('clear-btn');
+
+      if (!tickets.length) {
+        list.innerHTML = '';
+        list.appendChild(noTxt);
+        noTxt.style.display = 'block';
+        clearBtn.style.display = 'none';
+        return;
+      }
+
+      noTxt.style.display = 'none';
+      clearBtn.style.display = 'inline-flex';
+      list.innerHTML = '';
+
+      tickets.forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'ticket';
+        el.innerHTML = `
+          <div class="ticket-head">
+            <span class="ticket-id">#${t.id}</span>
+            <span class="ticket-badge">${t.type.icon} ${t.type.label}</span>
+          </div>
+          <p class="ticket-title">${escHtml(t.title)}</p>
+          ${t.desc ? `<p class="ticket-desc">${escHtml(t.desc)}</p>` : ''}
+          <div class="ticket-foot">
+            <span class="pulse-dot"></span>
+            <span>En attente · ${t.submittedAt}</span>
+            ${t.date && t.date !== 'Non précisée' ? ` · 📅 ${t.date}` : ''}
+          </div>`;
+        list.appendChild(el);
+      });
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* Init */
+    renderTickets();
+  </script>
+</body>
+</html>
