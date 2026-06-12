@@ -9,22 +9,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="page fade-up">
+<body class="page">
 
   <canvas id="particles-canvas"></canvas>
   <div class="toast" id="toast"></div>
 
   <nav class="nav" id="main-nav">
     <span class="nav-logo">Pour My Queen 👑</span>
-    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <div class="nav-links">
+      <a href="index.html"    class="nav-link">Accueil</a>
+      <a href="surprise.html" class="nav-link active">Surprise</a>
+      <a href="coupons.html"  class="nav-link">Mes bons</a>
+    </div>
+    <button class="hamburger" id="hamburger-btn" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
-    <div class="nav-links">
-      <a href="index.html"    class="nav-link"        onclick="closeMenu()">Accueil</a>
-      <a href="surprise.html" class="nav-link active" onclick="closeMenu()">Surprise</a>
-      <a href="coupons.html"  class="nav-link"        onclick="closeMenu()">Mes bons</a>
-    </div>
   </nav>
+
+  <!-- Mobile drawer -->
+  <div class="mob-overlay" id="mob-overlay" onclick="closeMenu()"></div>
+  <div class="mob-drawer" id="mob-drawer">
+    <a href="index.html"    class="mob-link" onclick="closeMenu()">Accueil</a>
+    <a href="surprise.html" class="mob-link active">Surprise</a>
+    <a href="coupons.html"  class="mob-link" onclick="closeMenu()">Mes bons</a>
+  </div>
 
   <!-- SECTION 1 : Boîte cadeau -->
   <section class="section" id="sec-gift">
@@ -291,8 +299,29 @@
     startPhotosBg();
 
     /* ── Hamburger menu ── */
-    function toggleMenu() { document.getElementById('main-nav').classList.toggle('open'); }
-    function closeMenu()  { document.getElementById('main-nav').classList.remove('open'); }
+    let _menuOpen = false;
+    function toggleMenu() { _menuOpen ? closeMenu() : _openMenu(); }
+    function _openMenu() {
+      _menuOpen = true;
+      const drawer  = document.getElementById('mob-drawer');
+      const overlay = document.getElementById('mob-overlay');
+      document.getElementById('hamburger-btn').classList.add('open');
+      overlay.classList.add('open');
+      drawer.style.transition = 'none';
+      drawer.style.right = '-100%';
+      void drawer.offsetWidth;
+      drawer.style.transition = 'right 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
+      drawer.style.right = '0px';
+    }
+    function closeMenu() {
+      _menuOpen = false;
+      const drawer  = document.getElementById('mob-drawer');
+      const overlay = document.getElementById('mob-overlay');
+      document.getElementById('hamburger-btn').classList.remove('open');
+      overlay.classList.remove('open');
+      drawer.style.transition = 'right 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
+      drawer.style.right = '-100%';
+    }
   </script>
 </body>
 </html>
