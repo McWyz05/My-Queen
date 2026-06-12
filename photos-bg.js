@@ -39,7 +39,7 @@
     'Photos/IMG-20260129-WA0033.jpg',
   ];
 
-  // Mélange et prend 12 photos au hasard
+  // File d'attente infinie : toutes les photos en ordre aléatoire, qui reboucle
   function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -48,110 +48,93 @@
     }
     return a;
   }
-  const SELECTED = shuffle(ALL_PHOTOS).slice(0, 12);
+  let queue = shuffle(ALL_PHOTOS);
+  let queueIdx = 0;
+  function nextPhoto() {
+    const src = queue[queueIdx];
+    queueIdx++;
+    if (queueIdx >= queue.length) { queue = shuffle(ALL_PHOTOS); queueIdx = 0; }
+    return src;
+  }
 
   const floaters = [];
+  let started = false;
 
   function rnd(min, max) { return min + Math.random() * (max - min); }
 
-  function createFloater(src, initialOnScreen) {
+  function createFloater(initialOnScreen) {
     const el = document.createElement('div');
     el.className = 'photo-floater';
-
     const img = document.createElement('img');
-    img.src = src;
+    img.src = nextPhoto();
     img.draggable = false;
     el.appendChild(img);
     document.body.appendChild(el);
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const size = rnd(90, 155);
-    const ratio = rnd(0.75, 1.35);
-
-    const obj = {
-      el,
-      w: size,
-      h: size * ratio,
-      x: 0, y: 0,
-      vx: 0, vy: 0,
-      rot: rnd(-28, 28),
-      rs: rnd(-0.04, 0.04),
-      opacity: rnd(0.18, 0.32),
+    const size  = rnd(110, 170);
+    const ratio = rnd(0.75, 1.4);
+    const obj   = {
+      el, img,
+      w: size, h: size * ratio,
+      x: 0, y: 0, vx: 0, vy: 0,
+      rot: rnd(-25, 25),
+      rs:  rnd(-0.035, 0.035),
+      opacity: rnd(0.38, 0.58),
     };
 
-    el.style.width  = obj.w + 'px';
-    el.style.height = obj.h + 'px';
+    el.style.width   = obj.w + 'px';
+    el.style.height  = obj.h + 'px';
     el.style.opacity = obj.opacity;
 
     if (initialOnScreen) {
-      obj.x = rnd(-obj.w, w);
-      obj.y = rnd(-obj.h, h);
+      obj.x = rnd(0, window.innerWidth  - obj.w);
+      obj.y = rnd(0, window.innerHeight - obj.h);
+      const speed = rnd(0.25, 0.55);
+      const angle = Math.random() * Math.PI * 2;
+      obj.vx = Math.cos(angle) * speed;
+      obj.vy = Math.sin(angle) * speed;
     } else {
       spawnFromEdge(obj);
     }
-
-    const speed = rnd(0.18, 0.42);
-    const angle = Math.random() * Math.PI * 2;
-    obj.vx = Math.cos(angle) * speed;
-    obj.vy = Math.sin(angle) * speed;
-
     floaters.push(obj);
   }
 
   function spawnFromEdge(obj) {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const edge = Math.floor(Math.random() * 4);
-    const speed = rnd(0.18, 0.42);
+    const w = window.innerWidth, h = window.innerHeight;
+    const edge  = Math.floor(Math.random() * 4);
+    const speed = rnd(0.25, 0.55);
     let angle;
-    if (edge === 0) { // left
-      obj.x = -obj.w - 10; obj.y = rnd(0, h);
-      angle = rnd(-Math.PI / 4, Math.PI / 4);
-    } else if (edge === 1) { // right
-      obj.x = w + 10; obj.y = rnd(0, h);
-      angle = Math.PI + rnd(-Math.PI / 4, Math.PI / 4);
-    } else if (edge === 2) { // top
-      obj.x = rnd(0, w); obj.y = -obj.h - 10;
-      angle = Math.PI / 2 + rnd(-Math.PI / 4, Math.PI / 4);
-    } else { // bottom
-      obj.x = rnd(0, w); obj.y = h + 10;
-      angle = -Math.PI / 2 + rnd(-Math.PI / 4, Math.PI / 4);
-    }
+    if (edge === 0) { obj.x = -obj.w - 5; obj.y = rnd(0, h); angle = rnd(-Math.PI/4, Math.PI/4); }
+    else if (edge === 1) { obj.x = w + 5;  obj.y = rnd(0, h); angle = Math.PI + rnd(-Math.PI/4, Math.PI/4); }
+    else if (edge === 2) { obj.x = rnd(0, w); obj.y = -obj.h - 5; angle = Math.PI/2 + rnd(-Math.PI/4, Math.PI/4); }
+    else                 { obj.x = rnd(0, w); obj.y = h + 5;      angle = -Math.PI/2 + rnd(-Math.PI/4, Math.PI/4); }
     obj.vx = Math.cos(angle) * speed;
     obj.vy = Math.sin(angle) * speed;
+    // Charge la photo suivante dans la file
+    obj.img.src = nextPhoto();
   }
 
   function isOffScreen(obj) {
-    const margin = 200;
-    return (
-      obj.x < -margin - obj.w ||
-      obj.x > window.innerWidth  + margin ||
-      obj.y < -margin - obj.h ||
-      obj.y > window.innerHeight + margin
-    );
+    const m = 220;
+    return obj.x < -m - obj.w || obj.x > window.innerWidth  + m
+        || obj.y < -m - obj.h || obj.y > window.innerHeight + m;
   }
 
   function animate() {
     floaters.forEach(obj => {
-      obj.x   += obj.vx;
-      obj.y   += obj.vy;
-      obj.rot += obj.rs;
-      obj.el.style.transform = `translate(${obj.x}px, ${obj.y}px) rotate(${obj.rot}deg)`;
+      obj.x += obj.vx; obj.y += obj.vy; obj.rot += obj.rs;
+      obj.el.style.transform = `translate(${obj.x}px,${obj.y}px) rotate(${obj.rot}deg)`;
       if (isOffScreen(obj)) spawnFromEdge(obj);
     });
     requestAnimationFrame(animate);
   }
 
-  // Crée les floaters une fois le DOM prêt
-  function init() {
-    SELECTED.forEach((src, i) => createFloater(src, true));
+  // Appelé manuellement (depuis clickOui sur index.html, ou au chargement sur les autres pages)
+  window.startPhotosBg = function () {
+    if (started) return;
+    started = true;
+    const NB = 10; // floaters simultanés
+    for (let i = 0; i < NB; i++) createFloater(true);
     animate();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  };
 })();
