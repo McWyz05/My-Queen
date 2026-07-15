@@ -216,6 +216,10 @@
       const desc  = document.getElementById('f-desc').value.trim();
       const date  = document.getElementById('f-date').value;
 
+      if (typeof emailjs === 'undefined') {
+        showToast('❌ Page pas encore chargée. Recharge et réessaie !', 3500);
+        return;
+      }
       if (!title) { showToast('⚠️ Donne un titre à ton bon !'); return; }
       if (!selectedType) { showToast('⚠️ Choisis un type de bon !'); return; }
 
